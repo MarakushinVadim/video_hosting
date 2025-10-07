@@ -6,10 +6,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Like, Video
+from .models import Like, Video, VideoFile
 from .pagination import MyPagination
 from .permissions import IsOwner
-from .serializers import LikeSerializer, UserSerializer, VideoSerializer
+from .serializers import LikeSerializer, UserSerializer, VideoSerializer, VideoFileSerializer
 
 
 class UserCreateAPIView(APIView):
@@ -67,6 +67,21 @@ class VideoViewSet(ModelViewSet):
             self.permission_classes = (AllowAny,)
 
         return super().get_permissions()
+
+
+class VideoFileViewSet(viewsets.ModelViewSet):
+    queryset = VideoFile.objects.all()
+    serializer_class = VideoFileSerializer
+
+    def perform_create(self, serializer):
+        video_file = serializer.save()
+        video_file.video = serializer.id
+        video_file.save()
+
+    def list(self, request, *args, **kwargs):
+        queryset = VideoFile.objects.filter(video_id=self.kwargs['video_id'])
+        serializer = VideoFileSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 

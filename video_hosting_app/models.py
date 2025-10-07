@@ -1,5 +1,5 @@
 from django.db import models
-from rest_framework.authtoken.admin import User
+from django.contrib.auth.models import User
 
 
 class Video(models.Model):
@@ -7,7 +7,7 @@ class Video(models.Model):
     is_published = models.BooleanField(default=False)
     name = models.CharField(max_length=255)
     total_likes = models.PositiveIntegerField(default=0)
-    crawled_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class VideoFile(models.Model):
     QUALITY_CHOICES = [

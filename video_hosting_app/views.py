@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Like, Video
+from .pagination import MyPagination
 from .permissions import IsOwner
 from .serializers import LikeSerializer, UserSerializer, VideoSerializer
 
@@ -31,6 +32,7 @@ class UserCreateAPIView(APIView):
 class VideoViewSet(ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
+    pagination_class = MyPagination
 
 
     def perform_create(self, serializer):

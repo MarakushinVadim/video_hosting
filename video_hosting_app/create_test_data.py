@@ -1,5 +1,6 @@
 import random
 
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from datetime import timedelta
 
@@ -9,8 +10,8 @@ from .models import VideoFile, Video
 
 
 def create_test_data():
-    Video.objects.all().delete()
     VideoFile.objects.all().delete()
+    Video.objects.all().delete()
     User.objects.all().delete()
     print('Tables cleared')
     users = []
@@ -20,7 +21,8 @@ def create_test_data():
         user = User(
             username=f'user_{i}',
             email=f'user_{i}@mail.ru',
-            password='123456',
+            password='testpas',
+            is_active=True,
         )
         print(f'{user.username} created')
         users.append(user)
@@ -41,13 +43,13 @@ def create_test_data():
 
     for video in videos:
         for quality in ['HD', 'FHD', 'UHD']:
-            VideoFile(
-                video=video,
+            video_file = VideoFile(
+                video_id=video.id,
                 file=f'videos/video_{quality}.mp4',
                 quality=quality,
             )
             print(f'id - {video.id}, {video.name} {quality} created')
-            video_files.append(video)
+            video_files.append(video_file)
 
 
     VideoFile.objects.bulk_create(video_files)

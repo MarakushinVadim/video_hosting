@@ -23,4 +23,4 @@ class VideoFileSerializer(serializers.ModelSerializer):
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = ['id', 'video', 'user']
+        fields = '__all__'

@@ -40,6 +40,12 @@ class VideoViewSet(ModelViewSet):
         video.owner = self.request.user
         video.save()
 
+    def retrieve(self, request, *args, **kwargs):
+        video = Video.objects.get(pk=kwargs['pk'])
+        serializer = VideoSerializer(video)
+        return Response(serializer.data)
+
+
     def list(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated:
             queryset = Video.objects.filter(is_published=True)

@@ -9,15 +9,33 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'password')
 
-class VideoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Video
-        fields = '__all__'
 
 class VideoFileSerializer(serializers.ModelSerializer):
+    quality_display = serializers.SerializerMethodField()
+
     class Meta:
         model = VideoFile
-        fields = '__all__'
+        fields = ('file', 'quality_display')
+
+    def get_quality_display(self, obj):
+        return obj.get_quality_display()
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    video_files = VideoFileSerializer(many=True, read_only=True, source='videofile_set')
+
+    class Meta:
+        model = Video
+        fields = (
+            'id',
+            'is_published',
+            'owner',
+            'name',
+            'total_likes',
+            'created_at',
+            'video_files',
+        )
 
 
 class LikeSerializer(serializers.ModelSerializer):

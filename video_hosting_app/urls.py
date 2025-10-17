@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .apps import VideoHostingAppConfig
-from .views import UserCreateAPIView, VideoViewSet
+from .views import UserCreateAPIView, VideoViewSet, LikeViewSet
 
 app_name = VideoHostingAppConfig.name
 
@@ -16,4 +16,5 @@ urlpatterns = [
     path('register/', UserCreateAPIView.as_view(), name='register'),
     path('', VideoViewSet.as_view({'get': 'list'}), name='list'),
     path('<int:pk>/', VideoViewSet.as_view({'get': 'retrieve'}), name='retrieve'),
+    path('<int:video_id>/like/', LikeViewSet.as_view({'post': 'create'}), name='like'),
 ]

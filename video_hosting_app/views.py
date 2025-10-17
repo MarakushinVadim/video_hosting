@@ -18,7 +18,6 @@ class UserCreateAPIView(APIView):
     permission_classes = (AllowAny,)
     http_method_names = ('post',)
 
-
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -29,11 +28,11 @@ class UserCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class VideoViewSet(ModelViewSet):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     pagination_class = MyPagination
-
 
     def perform_create(self, serializer):
         video = serializer.save()
@@ -45,18 +44,17 @@ class VideoViewSet(ModelViewSet):
         serializer = VideoSerializer(video)
         return Response(serializer.data)
 
-
     def list(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated:
-            queryset = Video.objects.filter(is_published=True)
+            queryset = Video.objects.filter(is_published=True).select_related('owner')
             paginated_queryset = self.paginate_queryset(queryset)
             serializer = VideoSerializer(paginated_queryset, many=True)
             return self.get_paginated_response(serializer.data)
         if self.request.user.is_staff:
-            queryset = Video.objects.all()
+            queryset = Video.objects.all().select_related('owner')
             serializer = VideoSerializer(queryset, many=True)
             return Response(serializer.data)
-        queryset = Video.objects.filter(Q(owner=self.request.user) | Q(is_published=True))
+        queryset = Video.objects.filter(Q(owner=self.request.user) | Q(is_published=True)).select_related('owner')
         serializer = VideoSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -64,9 +62,9 @@ class VideoViewSet(ModelViewSet):
         if self.action == 'create':
             self.permission_classes = (IsAuthenticated,)
         elif (
-            self.action == 'update'
-            or self.action == 'destroy'
-            or self.action == 'partial_update'
+                self.action == 'update'
+                or self.action == 'destroy'
+                or self.action == 'partial_update'
         ):
             self.permission_classes = (IsOwner,)
         elif self.action == 'list':
@@ -90,25 +88,33 @@ class VideoFileViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 class LikeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        video_id = request.data.get('video_id')
+        video_id = kwargs['video_id']
         user = request.user
 
         if not video_id:
-            return Response({'Ошибка' : 'Видео не найдено'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Видео не найдено'}, status=status.HTTP_400_BAD_REQUEST)
+
+        video = Video.objects.get(pk=video_id)
+        video_published = video.is_published
+
+        if not video_published:
+            return Response({'Ошибка': 'Опубликованного видео по запросу не найдено'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         like_exists = Like.objects.filter(video_id=video_id, user=user).exists()
         if like_exists:
             Like.objects.get(video_id=video_id, user=user).delete()
+            video.total_likes -= 1
+            video.save()
             return Response({'message': 'Лайк удален'}, status=status.HTTP_204_NO_CONTENT)
         else:
             like = Like.objects.create(video_id=video_id, user=user)
             serializer = LikeSerializer(like)
+            video.total_likes += 1
+            like.save()
+            video.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-

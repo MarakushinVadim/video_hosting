@@ -28,8 +28,6 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = (
-            'id',
-            'is_published',
             'owner',
             'name',
             'total_likes',
@@ -42,3 +40,13 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = '__all__'
+
+class IDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ('id',)
+
+# class SubQuerySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ('id',)

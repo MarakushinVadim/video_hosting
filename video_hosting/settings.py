@@ -145,25 +145,36 @@ REST_FRAMEWORK = {
 if DEBUG:
     LOGGING = {
         'version': 1,
-        'filters': {
-            'require_debug_false': {
-                '()': 'django.utils.log.RequireDebugFalse',
-            }
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+                'style': '{',
+            },
+            'simple': {
+                'format': '{levelname} {message}',
+                'style': '{',
+            },
         },
         'handlers': {
             'console': {
                 'level': 'DEBUG',
-                'filters': ['require_debug_false'],
+                'formatter': 'verbose',
                 'class': 'logging.StreamHandler',
-            }
+            },
         },
         'loggers': {
-            'django.db.backends': {
+            'django.db.backends': {  # Логгер для SQL-запросов
                 'level': 'DEBUG',
                 'handlers': ['console'],
                 'propagate': False,
-            }
-        }
+            },
+            'django': {  # Общий логгер Django
+                'handlers': ['console'],
+                'level': 'INFO',
+                'propagate': False,
+            },
+        },
     }
 
 CSRF_TRUSTED_ORIGINS = [

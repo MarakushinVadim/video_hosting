@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Video(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='videos')
     is_published = models.BooleanField(default=False)
     name = models.CharField(max_length=255)
     total_likes = models.PositiveIntegerField(default=0)

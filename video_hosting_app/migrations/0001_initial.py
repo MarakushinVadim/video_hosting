@@ -15,34 +15,92 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Video',
+            name="Video",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('is_published', models.BooleanField(default=False)),
-                ('name', models.CharField(max_length=255)),
-                ('total_likes', models.PositiveIntegerField(default=0)),
-                ('crawled_at', models.DateTimeField(auto_now_add=True)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("is_published", models.BooleanField(default=False)),
+                ("name", models.CharField(max_length=255)),
+                ("total_likes", models.PositiveIntegerField(default=0)),
+                ("crawled_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Like',
+            name="Like",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('video', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='video_hosting_app.video')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "video",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="video_hosting_app.video",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='VideoFile',
+            name="VideoFile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to='videos/')),
-                ('quality', models.CharField(choices=[('HD', 'HD (720p)'), ('FHD', 'FHD (1080p)'), ('UHD', 'UHD (4k)')], max_length=3)),
-                ('video', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='video_hosting_app.video')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("file", models.FileField(upload_to="videos/")),
+                (
+                    "quality",
+                    models.CharField(
+                        choices=[
+                            ("HD", "HD (720p)"),
+                            ("FHD", "FHD (1080p)"),
+                            ("UHD", "UHD (4k)"),
+                        ],
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "video",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="video_hosting_app.video",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('video', 'quality')},
+                "unique_together": {("video", "quality")},
             },
         ),
     ]

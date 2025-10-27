@@ -7,7 +7,7 @@ from .models import Like, Video, VideoFile
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ("id", "username", "email", "password")
 
 
 class VideoFileSerializer(serializers.ModelSerializer):
@@ -15,38 +15,34 @@ class VideoFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VideoFile
-        fields = ('file', 'quality_display')
+        fields = ("file", "quality_display")
 
     def get_quality_display(self, obj):
         return obj.get_quality_display()
 
 
 class VideoSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
-    video_files = VideoFileSerializer(many=True, read_only=True, source='videofile_set')
+    owner = serializers.ReadOnlyField(source="owner.username")
+    video_files = VideoFileSerializer(many=True, read_only=True, source="videofile_set")
 
     class Meta:
         model = Video
         fields = (
-            'owner',
-            'name',
-            'total_likes',
-            'created_at',
-            'video_files',
+            "owner",
+            "name",
+            "total_likes",
+            "created_at",
+            "video_files",
         )
 
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = '__all__'
+        fields = "__all__"
+
 
 class IDSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
-        fields = ('id',)
-
-# class SubQuerySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ('id',)
+        fields = ("id",)

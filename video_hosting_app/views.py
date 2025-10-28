@@ -22,12 +22,20 @@ from .serializers import (
 
 
 class UserCreateAPIView(APIView):
+    """
+    Эндпоинт для создания пользователя на основе стандартной модели User
+    """
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     http_method_names = ("post",)
 
     def post(self, request, *args, **kwargs):
+        """
+        Метод для создания пользователя, прогоняет данные через сериализатор и если данные валидны,
+        создает пользователя (устанавливает поле is_active=True) возвращает статус 201,
+        если данные не валидны возвращает статус 400
+        """
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -39,21 +47,33 @@ class UserCreateAPIView(APIView):
 
 
 class VideoViewSet(ModelViewSet):
+    """
+    Эндпоинт для работы с объектами класса Video
+    """
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
     pagination_class = MyPagination
 
     def perform_create(self, serializer):
+        """
+        При создании видео, назначает текущего пользователя владельцем видео
+        """
         video = serializer.save()
         video.owner = self.request.user
         video.save()
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Метод для получения данных о конкретном видео
+        """
         video = Video.objects.get(pk=kwargs["pk"])
         serializer = VideoSerializer(video)
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
+        """
+        Метод для получения списка видео, возвращает данные в зависимости от прав пользователя
+        """
         if not self.request.user.is_authenticated:
             queryset = Video.objects.filter(is_published=True).select_related("owner")
             paginated_queryset = self.paginate_queryset(queryset)
@@ -70,6 +90,9 @@ class VideoViewSet(ModelViewSet):
         return Response(serializer.data)
 
     def get_permissions(self):
+        """
+        Метод для установки прав доступа для пользователей
+        """
         if self.action == "create":
             self.permission_classes = (IsAuthenticated,)
         elif (
@@ -85,24 +108,40 @@ class VideoViewSet(ModelViewSet):
 
 
 class VideoFileViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт для создания видео-файлов к видео
+    """
     queryset = VideoFile.objects.all()
     serializer_class = VideoFileSerializer
 
     def perform_create(self, serializer):
+        """
+        Метод для проверки валидности данных и последующего сохранения видео-файла
+        """
         video_file = serializer.save()
         video_file.video = serializer.id
         video_file.save()
 
     def list(self, request, *args, **kwargs):
+        """
+        Метод для получения списка видео-файлов
+        """
         queryset = VideoFile.objects.filter(video_id=self.kwargs["video_id"])
         serializer = VideoFileSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class LikeViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт для создания/удаления лайков
+    """
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        """
+        Метод который, если на данном Видео от данного пользователя уже есть лайк - удаляет его,
+         если нет - создает
+        """
         try:
             with transaction.atomic():
                 video_id = kwargs["video_id"]
@@ -146,16 +185,28 @@ class LikeViewSet(viewsets.ModelViewSet):
 
 
 class IDViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт для получения списка id видео
+    возвращает список c идентификаторами всех опубликованных видео, все видео за один раз, без пагинации
+    доступен только служебным пользователям
+    """
     permission_classes = [IsStaff]
     pagination_class = None
 
     def list(self, request, *args, **kwargs):
+        """
+        Метод, который возвращает список ID
+        """
         queryset = Video.objects.filter(is_published=True)
         serializer = IDSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
 class SubQueryViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт который, возвращают список пользователей с количеством их лайков через подзапрос
+    доступен только служебным пользователям
+    """
     permission_classes = [IsStaff]
 
     def list(self, request, *args, **kwargs):
@@ -175,6 +226,10 @@ class SubQueryViewSet(viewsets.ModelViewSet):
 
 
 class CroupByViewSet(viewsets.ModelViewSet):
+    """
+    Эндпоинт который, возвращают список пользователей с количеством их лайков через группировку
+    доступен только служебным пользователям
+    """
     permission_classes = [IsStaff]
 
     def list(self, request, *args, **kwargs):
